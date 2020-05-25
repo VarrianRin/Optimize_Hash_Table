@@ -22,7 +22,7 @@ const int    INITSIZE       = 1000,
 #define CHECKLIST(list) /*if(ListOk(list)) ListDump(list, __FILE__, __LINE__, __PRETTY_FUNCTION__); */
 
 struct Element {
-
+ 
     Elem_t   data;
     Element* next;
 };
