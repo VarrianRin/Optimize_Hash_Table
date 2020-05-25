@@ -10,6 +10,6 @@ that is definitely slow.
 However it is clear where is the bottleneck - it's sscanf!
 Of course we don't need all sscanf functionality so lets write mini-sscanf on asm that gets word from text.
 let's check how fast is hash table now.
-![alt text]("profiling with gw.jpg")
+![alt text](profiling with gw.jpg)
 # time = 2.16 seconds
 
