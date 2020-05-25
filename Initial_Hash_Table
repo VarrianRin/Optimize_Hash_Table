@@ -143,7 +143,9 @@ unsigned int Rolling(const char* word) {
 
 	int hash = 0;
 
-	for (int i = 0; word[i]; i++, hash += ((word[i] >> 7) | (word[i] << 1)));
+	for (int i = 0; word[i]; i++) {
+		hash += (unsigned char)((word[i] >> 1) | (word[i] << 7));
+	}
 
 	return hash;
 }
