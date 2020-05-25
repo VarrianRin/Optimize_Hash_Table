@@ -15,7 +15,7 @@ const char* FILENAME = "eng_words.txt";
 
 const int TABLESIZE = 511,
 WORDSIZE = 30,
-N_HASHES = 6;
+N_HASHES = 5;
 
 struct HashTable {
 
@@ -237,18 +237,18 @@ int main() {
 
 	/*Table[0].HashFunc = VeryBadHash;
 	Table[0].HashName = "VeryBadHash";*/
-	Table[1].HashFunc = FirstSymbol;
-	Table[1].HashName = "FirstSym";
-	Table[2].HashFunc = Length;
-	Table[2].HashName = "Length";
-	Table[3].HashFunc = Sum;
-	Table[3].HashName = "Sum";
-	Table[4].HashFunc = Rolling;
-	Table[4].HashName = "Rolling";
-	Table[5].HashFunc = GNUHash;
-	Table[5].HashName = "GNU";
-	Table[0].HashFunc = GavHash;
-	Table[0].HashName = "Gav";
+	Table[0].HashFunc = FirstSymbol;
+	Table[0].HashName = "FirstSym";
+	Table[1].HashFunc = Length;
+	Table[1].HashName = "Length";
+	Table[2].HashFunc = Sum;
+	Table[2].HashName = "Sum";
+	Table[3].HashFunc = Rolling;
+	Table[3].HashName = "Rolling";
+	Table[4].HashFunc = GNUHash;
+	Table[4].HashName = "GNU";
+	/*Table[0].HashFunc = GavHash;
+	Table[0].HashName = "Gav";*/
 	//add hash here
 
 	for (int table_c = 0; table_c < N_HASHES; table_c++)
