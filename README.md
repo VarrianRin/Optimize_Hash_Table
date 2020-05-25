@@ -24,5 +24,5 @@ For example, let's rewrite Rolling and check again.
 
 # time = 2.05 seconds
 No diffrences it's just a permissible error. 
-So in conclusion we have accelerated hash table more than 50 times! Learn asm - it's usefull!
+So in conclusion we have accelerated hash table more than 50 times! Learn asm - it's useful!
 
