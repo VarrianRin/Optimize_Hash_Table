@@ -1,0 +1,281 @@
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+#include <sys\stat.h>
+#include "PointerList.h"
+
+//to add hash
+//write a hash function
+//make N_HASHES++
+//add hash in main
+
+const char* FILENAME = "eng_words.txt";
+
+const int TABLESIZE = 511,
+WORDSIZE = 30,
+N_HASHES = 5;
+
+struct HashTable {
+
+	List         WordList[TABLESIZE];
+	unsigned int (*HashFunc)(const char*);
+	const char* HashName;
+};
+/*
+int TableDotWriter(const HashTable* table) {
+
+	assert(table);
+
+	FILE* DotHashTableDump = fopen("HashTableDumps\\HashTableDump.txt", "wb");
+	if (!DotHashTableDump) {
+		printf("\n COULD NOT OPEN DUMP FILE\n");
+		return 1;
+	}
+
+	fprintf(DotHashTableDump, "digraph HashTableDump {\n"
+		"%s\n"
+		"\"LIST NUMBER 0\"->\"LIST NUMBER 1\";\n", table->HashName);
+
+	for (int i = 1; i < TABLESIZE - 1; i++)
+		fprintf(DotHashTableDump, "\"LIST NUMBER %d\"->\"LIST NUMBER %d\";\n", i, i + 1);
+
+	for (int list_c = 0; list_c < TABLESIZE; list_c++) {
+
+		fprintf(DotHashTableDump, "\"LIST NUMBER %d\"->", list_c);
+
+		for (int i = 0; i < table->WordList[list_c].size - 1; i++)
+			fprintf(DotHashTableDump, "\"data: %"ELEM_T" \\n next: %p\"->", table->WordList[list_c].Elem[i].data, table->WordList[list_c].Elem[i].next);
+
+		fprintf(DotHashTableDump, "\"data: %"ELEM_T" \\n end of list %d\";\n", table->WordList[list_c].Elem[table->WordList[list_c].size - 1].data, list_c);
+	}
+
+
+	fprintf(DotHashTableDump, "}");
+
+	fclose(DotHashTableDump);
+
+	system("dot -Tjpg -o F:\\proga\\HashTable\\HashTableDumps\\HashTableDump.jpg F:\\proga\\HashTable\\HashTableDumps\\HashTableDump.txt");
+	system("F:\\proga\\HashTable\\HashTableDumps\\HashTableDump.jpg");
+	return 0;
+}
+
+int HashTableDump(const HashTable* table) {
+
+	assert(table);
+
+	printf("\n----------------------------------------------------------------------\nHASH TABLE DUMP\n"
+		"HASH NAME: %s\n", table->HashName);
+
+	for (int list_c = 0; list_c < TABLESIZE; list_c++) {
+		printf("\nLIST NUMBER %d\n", list_c);
+		ListDump(&(table->WordList[list_c]), __FILE__, __LINE__, __PRETTY_FUNCTION__);
+	}
+
+	printf("======================================================================\n");
+
+	TableDotWriter(table);
+
+	return 0;
+}*/
+
+int GetFileSize(const char* FileName) {
+
+	assert(FileName != NULL);
+
+	struct _stat buff = {};
+	int StatReturn = _stat(FileName, &buff);
+	assert(StatReturn == 0);
+
+	return buff.st_size;
+}
+
+char* WinReader(const char* FileName, int SizeFile) {
+
+	assert(FileName != NULL);
+
+	FILE* TextFile = fopen(FileName, "rb");
+	assert(TextFile != NULL);
+
+	char* text = (char*)calloc(SizeFile + 1, sizeof(text[0]));
+
+	assert(text != NULL);
+
+	int ReadReturn = fread(text, sizeof(text[0]), SizeFile, TextFile);
+	assert(ReadReturn == SizeFile);
+	fclose(TextFile);
+
+	text[SizeFile] = '\0';
+
+	return text;
+}
+
+//add hash function here
+
+/*unsigned int GavHash(const char* word) {
+
+	assert(word);
+
+	const int code = 0xBEDA;
+	unsigned int hash = 0;
+
+	for (int i = 1; i < WORDSIZE || !word[i]; i++)
+		hash += word[i] * i * code;
+
+	return hash;
+}*/
+
+unsigned int GNUHash(const char* word) {
+
+	assert(word);
+
+	int hash = 1023;
+
+	for (int i = 0; word[i]; i++, hash = hash * 31 + word[i]);
+
+	return hash;
+}
+
+unsigned int Length(const char* word) {
+
+	assert(word);
+
+	return strlen(word);
+}
+
+unsigned int Sum(const char* word) {
+
+	assert(word);
+
+	int sum = 0;
+	for (int i = 0; word[i]; i++, sum += word[i]);
+
+	return sum;
+}
+
+unsigned int FirstSymbol(const char* word) {
+
+	assert(word);
+
+	return *word;
+}
+
+/*unsigned int Rolling(const char* word) {
+
+	assert(word);
+
+	int hash = 0;
+
+	for (int i = 0; word[i]; i++) {
+		hash += (unsigned char)((word[i] >> 1) | (word[i] << 7));
+	}
+
+	return hash;
+}*/
+
+extern "C"
+{
+	int getword(char* text, char* word);
+}
+
+extern "C"
+{
+	unsigned int Rolling(const char* word);
+}
+
+bool HashWriter(HashTable* table) {
+
+	assert(table);
+
+	char word[WORDSIZE] = {};
+	/*FILE* Text = fopen(FILENAME, "r");
+
+	if (!Text) {
+		printf("could not open the file!");
+		abort();
+	}
+	*/
+	char* Text = WinReader(FILENAME, GetFileSize(FILENAME));
+	unsigned int offset = 0, 
+		lenght = 0;
+
+	for (int table_c = 0; table_c < N_HASHES; table_c++) {
+
+		do {																	//sscanf(Text + offset, "%s%n", word, &lenght) != EOF before
+			
+			lenght = getword(Text + offset, word);								//new
+			offset += lenght;
+			unsigned int hash = table[table_c].HashFunc(word);
+			PushLast(&(table[table_c].WordList[hash % TABLESIZE]), hash);
+																			
+		} while (lenght);														//new	
+		
+		offset = 0;
+	}
+
+	free(Text);
+	//fclose(Text);
+	return 0;
+}
+
+bool CSVWriter(HashTable* table, const char* CSVFileName) {
+
+	assert(table);
+
+	FILE* CSVFile = fopen(CSVFileName, "a");
+
+	//fprintf(CSVFile, "\n%s\n", table->HashName);
+
+	/*fprintf(CSVFile, "\nList Number");
+	for(int list_c = 0; list_c < TABLESIZE; list_c++)
+		fprintf(CSVFile, ", %d", list_c);
+	  */
+	fprintf(CSVFile, "%s", table->HashName);
+	for (int list_c = 0; list_c < TABLESIZE; list_c++)
+		fprintf(CSVFile, ", %d", table->WordList[list_c].tail - table->WordList[list_c].Elem);
+
+	fprintf(CSVFile, "\n");
+
+	fclose(CSVFile);
+	return 0;
+}
+
+int main() {
+
+	HashTable Table[N_HASHES] = {};
+
+	/*Table[0].HashFunc = VeryBadHash;
+	Table[0].HashName = "VeryBadHash";*/
+	Table[0].HashFunc = FirstSymbol;
+	Table[0].HashName = "FirstSym";
+	Table[1].HashFunc = Length;
+	Table[1].HashName = "Length";
+	Table[2].HashFunc = Sum;
+	Table[2].HashName = "Sum";
+	Table[3].HashFunc = Rolling;
+	Table[3].HashName = "Rolling";
+	Table[4].HashFunc = GNUHash;
+	Table[4].HashName = "GNU";
+	/*Table[0].HashFunc = GavHash;
+	Table[0].HashName = "Gav";*/
+	//add hash here
+
+	for (int table_c = 0; table_c < N_HASHES; table_c++)
+		for (int list_c = 0; list_c < TABLESIZE; list_c++)
+			ListInit(Table[table_c].WordList + list_c);
+
+	HashWriter(Table);
+
+	for (int i = 0; i < N_HASHES; i++)
+		CSVWriter(&Table[i], "Graphs.csv");
+
+	//HashTableDump(&Table[5]);
+
+	for (int table_c = 0; table_c < N_HASHES; table_c++)
+		for (int list_c = 0; list_c < TABLESIZE; list_c++)
+			ListKill(Table[table_c].WordList + list_c);
+
+	return 0;
+}
+
