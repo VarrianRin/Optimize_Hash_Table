@@ -17,7 +17,7 @@ let's check how fast is hash table now.
 ![alt text](profiling_with_gw.jpg)
 
 # time = 2.16 seconds
-Wow! That's much better. And other functions that can be rewritten don't have much impact on time.
+WOW! That's MUCH better. And other functions that can be rewritten don't have much impact on time.
 For example, let's rewrite Rolling and check again.
 
 ![alt text](profiling_with_rol.jpg)
